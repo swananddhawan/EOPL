@@ -1,0 +1,35 @@
+q1:: S = {3n + 2 | n in N}
+
+a1::
+	Top down solution:
+		A natural number `n` is in S iff
+			0) n = 2 or
+			1) n - 3 in S.
+
+	Bottom up solution:
+		A natural number `n` is in S iff
+			0) n = 2 and
+			1) if (n is S), then (n + 3 in S)
+--------------------------------------------------------------------------------
+
+q2:: S = {2n + 3m + 1 | n,m in N}
+
+a2::
+	Top down solution:
+		A natural number `n` is in S iff
+			0) n = 1 or
+			1) (n - 2) in S or
+			2) (n - 3) in S
+	
+	Bottom up solution:
+		A natural number `n` is in S iff
+			0) n = 1 and
+			1) if (n is S), then (n + 3 in S) and
+			2) if (n in S), then (n + 5 in S)
+--------------------------------------------------------------------------------
+
+a3:: S = {(n, 2n + 1) | n in N}
+
+a3::
+	Top down solution:
+		
