@@ -1,86 +1,87 @@
+(load "../assignment-1/programs.scm")
 ;; 1a)
 
-;; my_length list = 0  ..... if null list
-;; my_length x:list = 1 + my_length list
+;; my-length list = 0  ..... if null list
+;; my-length x:list = 1 + my-length list
 
 ;; 1b)
-(define my_length
+(define my-length
         (lambda (l)
                 (if (null? l)
                         0
-                    (+ 1 (my_length (cdr l))))))
+                    (+ 1 (my-length (cdr l))))))
 
 ;; 1c)
-(define my_append
+(define my-append
         (lambda (l1 l2)
                 (if (null? l1)
                         l2
-                    (cons (car l1) (my_append (cdr l1) l2)))))
+                    (cons (car l1) (my-append (cdr l1) l2)))))
 
 
 ;; 1d)
-(define my_flatten
+(define my-flatten
 	(lambda (l)
 		(if (null? l)
 			l
 		    (if (list? (car l))
-		    	     (append (my_flatten (car l)) (my_flatten (cdr l)))
-			(cons (car l) (my_flatten (cdr l)))
+		    	     (append (my-flatten (car l)) (my-flatten (cdr l)))
+			(cons (car l) (my-flatten (cdr l)))
 		    )
 		)
 	)
 )
 
 ;; 1e)
-(define reverse_list
+(define reverse-list
 	(lambda (l)
 		(if (null? l)
 			l
-		    (my_append (reverse_list (cdr l)) (list (car l)))
+		    (my-append (reverse-list (cdr l)) (list (car l)))
 		)
 	)
 )
 
 ;; 1f
-(define get_first_occurence_index
-	(lambda (symbol list_of_symbols index)
-		(if (null? list_of_symbols)
+(define get-first-occurence-index
+	(lambda (symbol list-of-symbols index)
+		(if (null? list-of-symbols)
 			-1
-		    (if (eq? symbol (car list_of_symbols))
+		    (if (eq? symbol (car list-of-symbols))
 			     index
-			(get_first_occurence_index symbol (cdr list_of_symbols) (+ index 1))
+			(get-first-occurence-index symbol (cdr list-of-symbols) (+ index 1))
 		    )
 		)
 	)
 )
 
-(define list_index
-	(lambda (symbol list_of_symbols)
-		(get_first_occurence_index symbol list_of_symbols 0)
+(define list-index
+	(lambda (symbol list-of-symbols)
+		(get-first-occurence-index symbol list-of-symbols 0)
 	)	
 )
 
 
 ;; 1g)
-(define list_all_indices
-	(lambda (symbol list_of_symbols index)
-		(if (null? list_of_symbols)
-			list_of_symbols
-		    (if (eq? symbol (car list_of_symbols))
-		    	    (cons index (list_all_indices symbol (cdr list_of_symbols) (+ 1 index)))
-			(list_all_indices symbol (cdr list_of_symbols) (+ 1 index))    
+(define list-all-indices
+	(lambda (symbol list-of-symbols index)
+		(if (null? list-of-symbols)
+			list-of-symbols
+		    (if (eq? symbol (car list-of-symbols))
+		    	    (cons index (list-all-indices symbol (cdr list-of-symbols) (+ 1 index)))
+			(list-all-indices symbol (cdr list-of-symbols) (+ 1 index))    
 		    )
 		)
 	)
 )
-(define list_indices
-	(lambda (symbol list_of_symbols)
-		(list_all_indices symbol list_of_symbols 0)
+(define list-indices
+	(lambda (symbol list-of-symbols)
+		(list-all-indices symbol list-of-symbols 0)
 	)
 )
 
 ;;1h)
-(define invert_list
+(define invert-list
 	(lambda (lst)
 		(if (null? lst)
 			lst
@@ -91,7 +92,7 @@
 
 (define invert
 	(lambda (lst)
-		(map invert_list lst)
+		(map invert-list lst)
 	)
 )
 
@@ -100,62 +101,62 @@
 ;; To prove (-7 . (3 . (14 . ()))) is a list of numbers
 ;; Solution:
 ;;	step 1: (-7 . (3 . (14 . ()))) 
-;;	step 2: (-7 . (3 . (14 . list_of_numbers))) 
-;;	step 3: (-7 . (3 . (Int . list_of_numbers))) 
-;;	step 4: (-7 . (3 . list_of_numbers))
-;;	step 5: (-7 . (Int . list_of_numbers))
-;;	step 6: (-7 . list_of_numbers)
-;;	step 7: (Int . list_of_numbers)
-;;	step 8: list_of_numbers
+;;	step 2: (-7 . (3 . (14 . list-of-numbers))) 
+;;	step 3: (-7 . (3 . (Int . list-of-numbers))) 
+;;	step 4: (-7 . (3 . list-of-numbers))
+;;	step 5: (-7 . (Int . list-of-numbers))
+;;	step 6: (-7 . list-of-numbers)
+;;	step 7: (Int . list-of-numbers)
+;;	step 8: list-of-numbers
 
 ;; 2b)
 ;; Inductive specification of a list of numbers.
-;; List_of_numbers := () | (Int . List_of_numbers) 
+;; List-of-numbers := () | (Int . List-of-numbers) 
 
 ;; 2c)
 ;; Inductive specification of a list of characters.
-;; List_of_characters := () | (Char . List_of_characters) 
+;; List-of-characters := () | (Char . List-of-characters) 
 
 ;; 2d)
 ;; Inductive specification of a list of boolean.
-;; List_of_boolean := () | (Bool . List_of_boolean) 
+;; List-of-boolean := () | (Bool . List-of-boolean) 
 
 ;; 2e)
 ;; Inductive specification of a list of strings.
-;; List_of_strings := ({List_of_characters}*)
+;; List-of-strings := ({List-of-characters}*)
 
 ;; 2f)
 ;; Inductive specification of a list of symbols.
-;; List_of_symbols := () | (Symbol . List_of_symbols) 
+;; List-of-symbols := () | (Symbol . List-of-symbols) 
 
 ;; 2g)
 ;; 	b) inductive specification of nested list of numbers
-;;	   nested_list_of_numbers := ({List_of_numbers}*)
+;;	   nested-list-of-numbers := ({List-of-numbers}*)
 
 ;; 	c) inductive specification of nested list of characters
-;;	   nested_list_of_characters = list_of_strings := ({List_of_characters}*)
+;;	   nested-list-of-characters = list-of-strings := ({List-of-characters}*)
 
 ;; 	d) inductive specification of nested list of boolean
-;;	   nested_list_of_boolean := ({List_of_boolean}*)
+;;	   nested-list-of-boolean := ({List-of-boolean}*)
 
 ;; 	e) inductive specification of nested list of strings
-;;	   nested_list_of_strings := ({List_of_strings}*)
+;;	   nested-list-of-strings := ({List-of-strings}*)
 
 ;; 	f) inductive specification of nested list of symbols
-;;	   nested_list_of_symbols := ({List_of_symbols}*)
+;;	   nested-list-of-symbols := ({List-of-symbols}*)
 
 
 ;; 2h)
 ;; Single inductive specification for the data type based specifications in problem 2g.
-;; List_of_all_data_types := nested_list_of_numbers | 
-;;			     nested_list_of_characters |
-;;			     nested_list_of_boolean |
-;;			     nested_list_of_strings |
-;;			     nested_list_of_symbols
+;; List-of-all-data-types := nested-list-of-numbers | 
+;;			     nested-list-of-characters |
+;;			     nested-list-of-boolean |
+;;			     nested-list-of-strings |
+;;			     nested-list-of-symbols
 
 
 ;; 2i)
-;; Binary_Tree = () | (Int Binary_Tree Binary_Tree)
+;; Binary-Tree = () | (Int Binary-Tree Binary-Tree)
 
 
 ;; 3a)
@@ -219,13 +220,13 @@
 ;; multiply a b = add a (multiply a (pred b))
 
 ;; 3d)
-(define multiply_saurabh
+(define multiply-saurabh
 	(lambda (a b)
 		(if (zero? a)
 			0
 		    (if (zero? b)
 		    	  0
-			(add a (multiply_saurabh a (pred b)))
+			(add a (multiply-saurabh a (pred b)))
 		    )
 		)
 	)
@@ -233,14 +234,14 @@
 
 ;; 3e)
 ;; expo x 0 = 1
-;; expo x y = multiply_saurabh x (expo x (pred y))
+;; expo x y = multiply-saurabh x (expo x (pred y))
 
 ;; 3f)
 (define expo
 	(lambda (x y)
 		(if (zero? y)
 			1
-		    (multiply_saurabh x (expo x (pred y)))
+		    (multiply-saurabh x (expo x (pred y)))
 		)
 	)
 )
@@ -273,12 +274,12 @@
 )
 
 ;; 3h)
-(define list_of_numbers?
+(define list-of-numbers?
 	(lambda (lst)
 		(if (null? lst)
 			#t
 		    (if (number? (car lst))
-		    	  (and #t (list_of_numbers? (cdr lst)))
+		    	  (and #t (list-of-numbers? (cdr lst)))
 			#f
 		    )
 		)
@@ -286,39 +287,39 @@
 )
 
 ;; 3i)
-(define nth_element
+(define nth-element
 	(lambda (n lst)
 		(if (null? lst)
 			(display "element not found..!!\n")
 		    (if (zero? n)
 		    	   (car lst)
-			(nth_element (pred n) (cdr lst))
+			(nth-element (pred n) (cdr lst))
 		    )
 		)
 	)
 )
 
 ;; 3j)
-(define remove_first
+(define remove-first
 	(lambda (s los)
 		(if (null? los)
 			los
 		    (if (eq? s (car los))
 		    	    (cdr los)
-			(cons (car los) (remove_first s (cdr los)))
+			(cons (car los) (remove-first s (cdr los)))
 		    )
 		)
 	)
 )
 
 ;; 3k)
-(define remove_all
+(define remove-all
 	(lambda (s los)
 		(if (null? los)
 			los
 		    (if (eq? s (car los))
-		    	   (remove_all s (remove_first s los))
-			(cons (car los) (remove_all s (cdr los)))
+		    	   (remove-all s (remove-first s los))
+			(cons (car los) (remove-all s (cdr los)))
 		    )
 		)
 	)
@@ -326,13 +327,13 @@
 
 
 ;; 3l)
-(define substitue
+(define substitute
 	(lambda (old new s1)
 		(if (null? s1)
 			s1
 		    (if (eq? old (car s1))
-		    	     (cons new (substitue old new (cdr s1)))
-			(cons (car s1) (substitue old new (cdr s1)))
+		    	     (cons new (substitute old new (cdr s1)))
+			(cons (car s1) (substitute old new (cdr s1)))
 		    )
 		)
 	)
