@@ -24,33 +24,33 @@
 
 (define is-expression-grammatical-correct?
   (lambda (expression)
-     (let ((lst-operators '(+ *)))
-      (cond
-        ((null? expression)                      #f)
-        
-        ((symbol? expression)                    #t)
+    (let ((lst-operators '(+ *)))
+     (cond
+       ((null? expression)                      #f)
 
-        ((number? expression)                    (not (negative? expression)))
-                                                 
-                                                 ;; check if parameters are symbols only  &
-        ;; abstraction                           ;; the body of abstraction is grammatically correct
-        ((and (= (length expression) 3) 
-              (eq? 'lambda (car expression)))    (and (myfold my-and #t (map symbol? (cadr expression)))
-                                                      (is-expression-grammatical-correct? (caddr expression))))
-      
-        ;; num-op
-        ((elem? (car expression) lst-operators)  (if (not (= (length (cdr expression)) 2)) #f
-                                                      (and (is-expression-grammatical-correct? (cadr expression))
-                                                           (is-expression-grammatical-correct? (caddr expression)))))
+       ((symbol? expression)                    #t)
 
-        
-        ;; application
-        ((= (length expression) 2)               (and (is-expression-grammatical-correct? (car expression))
-                                                      (is-expression-grammatical-correct? (cadr expression))))
-        
-        (else                                    #f)))))
+       ((number? expression)                    (not (negative? expression)))
 
-        
+       ;; check if parameters are symbols only  &
+       ;; abstraction                           ;; the body of abstraction is grammatically correct
+       ((and (= (length expression) 3) 
+             (eq? 'lambda (car expression)))    (and (myfold my-and #t (map symbol? (cadr expression)))
+             (is-expression-grammatical-correct? (caddr expression))))
+
+       ;; num-op
+       ((elem? (car expression) lst-operators)  (if (not (= (length (cdr expression)) 2)) #f
+                                                  (and (is-expression-grammatical-correct? (cadr expression))
+                                                       (is-expression-grammatical-correct? (caddr expression)))))
+
+
+       ;; application
+       ((= (length expression) 2)               (and (is-expression-grammatical-correct? (car expression))
+                                                     (is-expression-grammatical-correct? (cadr expression))))
+
+       (else                                    #f)))))
+
+
 
 (define convert-lambda-abs-to-curried-form
   (lambda (expression lst-bound-vars)
@@ -65,17 +65,17 @@
   (lambda (expression)
     (cond 
       ((symbol? expression)              expression)
-      
+
       ((number? expression)              expression)
-      
+
       ((eq? 'lambda (car expression))    (convert-lambda-abs-to-curried-form expression 
-                                                                            (cadr expression)))
-      
+                                                                             (cadr expression)))
+
       ((or (eq? '+ (car expression))
            (eq? '* (car expression)))    (list (car expression)
-                                               (convert-to-curried-form (cadr expression))
-                                               (convert-to-curried-form (caddr expression))))
-      
+           (convert-to-curried-form (cadr expression))
+           (convert-to-curried-form (caddr expression))))
+
       (else                              (append (list (convert-to-curried-form (car expression)))
                                                  (list (convert-to-curried-form (cadr expression))))))))
 
@@ -98,8 +98,8 @@
        ;; if <num-op>
        ((elem? (car expression) lst-operators)  (cons 'num-op 
                                                       (list (list (car expression)
-                                                            (return-parse-tree (cadr expression))
-                                                            (return-parse-tree (caddr expression))))))
+                                                                  (return-parse-tree (cadr expression))
+                                                                  (return-parse-tree (caddr expression))))))
 
 
        ;; application
@@ -134,14 +134,14 @@
   (lambda (parse-tree environment lst-bound-vars)
     (let ((first-element (car parse-tree)))
      (cond
-       
+
        ;; (var-ref a)
        ((and (eq? 'var-ref first-element)
              (not (elem? (cadr parse-tree) 
                          lst-bound-vars)))        (basic-lookup (cadr parse-tree)
-                                                                      environment))
+                                                                environment))
 
-       
+
        ;; (abs (var-ref x) (body))
        ((eq? 'abs first-element)                  (append (list 'abs)
                                                           (list (cadr parse-tree)
@@ -149,8 +149,8 @@
                                                                            environment
                                                                            (cons (cadadr parse-tree)
                                                                                  lst-bound-vars)))))
-       
-       
+
+
        ;; (app (left) (right))
        ((eq? 'app first-element)                  (cons 'app
                                                         (list (my-lookup (cadr parse-tree)
@@ -159,8 +159,8 @@
                                                               (my-lookup (caddr parse-tree)
                                                                          environment
                                                                          lst-bound-vars))))
-       
-       
+
+
        ;; (num-op (+ (left) (right)))
        ((eq? 'num-op first-element)               (cons 'num-op
                                                         (list (list (caadr parse-tree)
@@ -170,14 +170,39 @@
                                                                     (my-lookup (car (cddadr parse-tree))
                                                                                environment
                                                                                lst-bound-vars)))))
-                                                              
+
 
        ;; (number n)
        (else                                      parse-tree)))))
-                                                     
+
 
 (define lookup
   (lambda (parse-tree environment)
-    (my-lookup parse-tree
-               environment
-               '())))
+    (my-lookup parse-tree environment '())))
+
+
+(define my-env '((a 1) (b 2) (c 3)))
+
+(define (beta-reduce exp)
+  (define (beta-reduce1 abst app)
+    (substitute (cadr abst) (cadr app) (caddr abst)))
+  (beta-reduce1 (cadr exp) (caddr exp)))
+
+(define (my-eval exp)
+  (cond
+    ((eq? '+ (car exp)) (+ (reduce (cadr exp)) (reduce (caddr exp))))
+    ((eq? '* (car exp)) (* (reduce (cadr exp)) (reduce (caddr exp))))))
+
+
+(define (reduce exp)
+  (cond
+    ((number? exp) exp)
+    ((eqv? 'var-ref (car exp)) exp)
+    ((eqv? 'app (car exp)) (reduce (beta-reduce exp)))
+    ((eqv? 'abs (car exp)) (reduce (caddr exp)))
+    ((eqv? 'num-op (car exp)) (my-eval (cadr exp)))))
+
+
+(define (my-interpreter exp)
+  (reduce (lookup (parse exp) my-env)))
+
