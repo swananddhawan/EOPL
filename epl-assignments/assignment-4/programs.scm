@@ -54,7 +54,7 @@
 
 (define convert-lambda-abs-to-curried-form
   (lambda (expression lst-bound-vars)
-    (if (null? lst-bound-vars) (caddr expression)
+    (if (null? lst-bound-vars) (convert-to-curried-form (caddr expression))
       (append (cons 'lambda
                     (list (car lst-bound-vars)))
               (list (convert-lambda-abs-to-curried-form expression (cdr lst-bound-vars)))))))
@@ -72,9 +72,9 @@
                                                                             (cadr expression)))
       
       ((or (eq? '+ (car expression))
-           (eq? '* (car expression)))    (append (list (car expression))
-                                                 (convert-to-curried-form (cadr expression))
-                                                 (convert-to-curried-form (caddr expression))))
+           (eq? '* (car expression)))    (list (car expression)
+                                               (convert-to-curried-form (cadr expression))
+                                               (convert-to-curried-form (caddr expression))))
       
       (else                              (append (list (convert-to-curried-form (car expression)))
                                                  (list (convert-to-curried-form (cadr expression))))))))
@@ -84,28 +84,28 @@
   (lambda (expression)
     (let ((lst-operators '(+ *)))
      (cond
-       ((symbol? expression)                    (cons 'var-exp
+       ((symbol? expression)                    (cons 'var-ref
                                                       (list expression)))
 
        ((number? expression)                    (cons 'number 
                                                       (list expression)))
 
        ;; abstraction
-       ((eq? 'lambda (car expression))          (append (list 'abstraction)
-                                                        (list (return-parse-tree (cadr expression)))
-                                                        (list (return-parse-tree (caddr expression)))))
+       ((eq? 'lambda (car expression))          (append (list 'abs)
+                                                        (list (return-parse-tree (cadr expression))
+                                                              (return-parse-tree (caddr expression)))))
 
        ;; if <num-op>
-       ((elem? (car expression) lst-operators)  (append (list 'num-op)
-                                                        (list (return-parse-tree (cadr expression)))
-                                                        (list (return-parse-tree (caddr expression)))))
+       ((elem? (car expression) lst-operators)  (cons 'num-op 
+                                                      (list (list (car expression)
+                                                            (return-parse-tree (cadr expression))
+                                                            (return-parse-tree (caddr expression))))))
 
 
        ;; application
-       (else                                    (append (list 'application)
-                                                        (list (return-parse-tree (car expression)))
-                                                        (list (return-parse-tree (cadr expression)))))))))
-
+       (else                                    (append (list 'app)
+                                                        (list (return-parse-tree (car expression))
+                                                              (return-parse-tree (cadr expression)))))))))
 
 
 (define parse
@@ -113,3 +113,71 @@
     (if (is-expression-grammatical-correct? expression) 
       (return-parse-tree (convert-to-curried-form expression))
       #f)))
+
+
+(define lst '(lambda (x) (+ x y)))
+(define app-lst '((lambda (x y) (+ x y)) (a b)))
+
+
+;; I have assumed that the values for free variables will be present 
+;; in the environment
+
+;; ************ handle the error if not found *************
+(define basic-lookup
+  (lambda (symbol environment)
+    (if (eq? symbol (caar environment))
+      (cadar environment)
+      (basic-lookup symbol (cdr environment)))))
+
+
+(define my-lookup
+  (lambda (parse-tree environment lst-bound-vars)
+    (let ((first-element (car parse-tree)))
+     (cond
+       
+       ;; (var-ref a)
+       ((and (eq? 'var-ref first-element)
+             (not (elem? (cadr parse-tree) 
+                         lst-bound-vars)))        (basic-lookup (cadr parse-tree)
+                                                                      environment))
+
+       
+       ;; (abs (var-ref x) (body))
+       ((eq? 'abs first-element)                  (append (list 'abs)
+                                                          (list (cadr parse-tree)
+                                                                (my-lookup (caddr parse-tree)
+                                                                           environment
+                                                                           (cons (cadadr parse-tree)
+                                                                                 lst-bound-vars)))))
+       
+       
+       ;; (app (left) (right))
+       ((eq? 'app first-element)                  (cons 'app
+                                                        (list (my-lookup (cadr parse-tree)
+                                                                         environment
+                                                                         lst-bound-vars)
+                                                              (my-lookup (caddr parse-tree)
+                                                                         environment
+                                                                         lst-bound-vars))))
+       
+       
+       ;; (num-op (+ (left) (right)))
+       ((eq? 'num-op first-element)               (cons 'num-op
+                                                        (list (list (caadr parse-tree)
+                                                                    (my-lookup (cadadr parse-tree)
+                                                                               environment
+                                                                               lst-bound-vars)
+                                                                    (my-lookup (car (cddadr parse-tree))
+                                                                               environment
+                                                                               lst-bound-vars)))))
+                                                              
+
+       ;; (number n)
+       (else                                      parse-tree)))))
+                                                     
+
+(define lookup
+  (lambda (parse-tree environment)
+    (my-lookup parse-tree
+               environment
+               '())))
